@@ -27,23 +27,16 @@ import { COLORS } from '../constants/constants'
 import MOCK_USER from '../constants/randonUser.json'
 import { UserAssets } from '../constants/assets'
 import UserCard from '../components/UserCard'
+import { lstat } from 'fs'
 
 function Directory() {
-  const [value, setValue] = React.useState('')
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => setValue(event.target.value)
-
+  // add an id field to each user in the MOCK_USER array
   const userArr = MOCK_USER.map((user: any, idx: number) => {
     return {
       id: idx,
       ...user,
     }
   })
-  const [users, setUsers] = useState<App.User[]>(userArr)
-
-  const [currUser, setCurrUser] = useState<App.User>(users[0])
-  const setUser = (user: App.User) => {
-    setCurrUser(user)
-  }
 
   // construct a dictionary where keys are letters from A to Z, values are empty array
   const nameDict: Record<string, App.User[]> = {}
@@ -61,6 +54,48 @@ function Directory() {
     nameDict[firstLetter].push(user)
   }
 
+  const [users, setUsers] = useState<App.User[]>(userArr)
+
+  // the current selected user shown on the right panel
+  const [currUser, setCurrUser] = useState<App.User>(nameDict.A[0])
+  const setUser = (user: App.User) => {
+    setCurrUser(user)
+  }
+
+  /**
+   * implement search & filter:
+   *   - if user enters a search value, show the filtered result
+   *   - otherwise sort user's last name in alphabetical order and display the default accordion
+   *
+   * give priority to
+   *   - strings that match the beginning of user's first name
+   *   - strings that match the beginning of user's last name
+   *   - strings that match the user's initials
+   */
+  const [filter, setFilter] = useState('')
+  const handleFilterUserArr = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFilter(event.target.value)
+
+    const searchInput = event.target.value
+    const first = []
+    const rest = []
+    for (const user of userArr) {
+      const initials = user.first_name[0] + user.last_name[0]
+      const containFirstName = user.first_name.indexOf(searchInput) === 0
+      const containLastName = user.last_name.indexOf(searchInput) === 0
+      const containInitials = initials.indexOf(searchInput) === 0
+
+      if (containFirstName || containLastName || containInitials) {
+        first.push(user)
+      } else {
+        rest.push(user)
+      }
+    }
+    const sortedArr = first.concat(rest)
+    setUsers(sortedArr)
+    // console.log(users)
+  }
+
   return (
     <Flex>
       <Flex>
@@ -70,44 +105,68 @@ function Directory() {
             <Text textStyle="body" mb="10px">
               Search directory of {users.length} employees
             </Text>
-            <Input placeholder="Search" size="sm" value={value} onChange={handleChange}></Input>
+            <Input placeholder="Search" size="sm" value={filter} onChange={handleFilterUserArr}></Input>
           </Flex>
-          <Box w="100%" h="85vh" display="flex" flexDirection="column" overflowY="scroll">
-            <Accordion allowToggle w="300px">
-              {Object.entries(nameDict).map(([key, value]) => {
+          <Box w="100%" h="82vh" display="flex" flexDirection="column" overflowY="scroll">
+            {filter !== '' ? (
+              users.map((user) => {
                 return (
-                  <AccordionItem key={key}>
-                    <AccordionButton>
-                      <Box as="span" flex="1" textAlign="left" fontSize="xs" color="font.secondary">
-                        {key}
-                      </Box>
-                      <AccordionIcon />
-                    </AccordionButton>
-                    <AccordionPanel p="0">
-                      {value.map((user) => (
-                        <Flex
-                          key={user.id}
-                          align="center"
-                          justifyContent="flex-start"
-                          w="100%"
-                          p="8px 1vh"
-                          cursor="pointer"
-                          _hover={{ background: COLORS.gray200 }}
-                          background={user.id === currUser.id ? COLORS.gray200 : 'transparent'}
-                          onClick={() => setUser(user)}
-                        >
-                          <Avatar size="sm" name={user.username} mr="15px" />
-                          <Flex direction="column">
-                            <Text textStyle="subtitle">{user.first_name + ' ' + user.last_name}</Text>
-                            <Text textStyle="body">{user.email}</Text>
-                          </Flex>
-                        </Flex>
-                      ))}
-                    </AccordionPanel>
-                  </AccordionItem>
+                  <Flex
+                    key={user.id}
+                    align="center"
+                    justifyContent="flex-start"
+                    w="100%"
+                    p="8px 1vh"
+                    cursor="pointer"
+                    _hover={{ background: COLORS.gray200 }}
+                    background={user.id === currUser.id ? COLORS.gray200 : 'transparent'}
+                    onClick={() => setUser(user)}
+                  >
+                    <Avatar size="sm" name={user.username} mr="15px" />
+                    <Flex direction="column">
+                      <Text textStyle="subtitle">{user.first_name + ' ' + user.last_name}</Text>
+                      <Text textStyle="body">{user.email}</Text>
+                    </Flex>
+                  </Flex>
                 )
-              })}
-            </Accordion>
+              })
+            ) : (
+              <Accordion allowToggle w="300px" defaultIndex={0}>
+                {Object.entries(nameDict).map(([key, value]) => {
+                  return (
+                    <AccordionItem key={key}>
+                      <AccordionButton>
+                        <Box as="span" flex="1" textAlign="left" fontSize="xs" color="font.secondary">
+                          {key}
+                        </Box>
+                        <AccordionIcon />
+                      </AccordionButton>
+                      <AccordionPanel p="0">
+                        {value.map((user) => (
+                          <Flex
+                            key={user.id}
+                            align="center"
+                            justifyContent="flex-start"
+                            w="100%"
+                            p="8px 1vh"
+                            cursor="pointer"
+                            _hover={{ background: COLORS.gray200 }}
+                            background={user.id === currUser.id ? COLORS.gray200 : 'transparent'}
+                            onClick={() => setUser(user)}
+                          >
+                            <Avatar size="sm" name={user.username} mr="15px" />
+                            <Flex direction="column">
+                              <Text textStyle="subtitle">{user.first_name + ' ' + user.last_name}</Text>
+                              <Text textStyle="body">{user.email}</Text>
+                            </Flex>
+                          </Flex>
+                        ))}
+                      </AccordionPanel>
+                    </AccordionItem>
+                  )
+                })}
+              </Accordion>
+            )}
           </Box>
         </Flex>
       </Flex>
@@ -191,7 +250,7 @@ function Directory() {
                 <Text fontStyle="subtitle" mt={2}>
                   Team
                 </Text>
-                <Grid templateColumns="repeat(2, 1fr)" gap={5}>
+                <Grid templateColumns="repeat(2, 1fr)" gap={8}>
                   <GridItem w="100%" h="10">
                     <UserCard currUser={currUser} />
                   </GridItem>{' '}

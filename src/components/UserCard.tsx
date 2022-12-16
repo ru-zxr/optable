@@ -3,7 +3,15 @@ import { Flex, Text, Avatar } from '@chakra-ui/react'
 
 const UserCard = ({ currUser }: { currUser: App.User }) => {
   return (
-    <Flex align="center" justifyContent="flex-start" w="100%" p="8px 2vh">
+    <Flex
+      align="center"
+      justifyContent="flex-start"
+      w="100%"
+      p="8px 2vh"
+      border="1px"
+      borderRadius="5px"
+      borderColor="gray.200"
+    >
       <Avatar size="sm" name={currUser.username} mr="15px" />
       <Flex direction="column">
         <Text textStyle="subtitle">{currUser.username}</Text>
