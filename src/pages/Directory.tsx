@@ -16,12 +16,11 @@ import {
   TabPanel,
   Grid,
   GridItem,
-  AvatarBadge,
-  AvatarGroup,
-  Card,
-  CardBody,
-  Stack,
-  background,
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionPanel,
+  AccordionIcon,
 } from '@chakra-ui/react'
 import styled from 'styled-components'
 import { COLORS } from '../constants/constants'
@@ -81,9 +80,25 @@ function Directory() {
     setCurrUser(user)
   }
 
+  // construct a dictionary where keys are letters from A to Z, values are empty array
+  const nameDict: Record<string, User[]> = {}
+  const startIndex = 'A'.charCodeAt(0)
+  for (let i = 0; i < 26; i++) {
+    const key = String.fromCharCode(i + startIndex)
+    nameDict[key] = []
+  }
+  // iterate through the userArr, sort and push user according to the first letter of their last them
+  for (let i = 0; i < userArr.length; i++) {
+    const user = userArr[i]
+    const firstLetter = user.last_name[0].toUpperCase()
+    if (!(firstLetter in nameDict)) continue
+    nameDict[firstLetter].push(user)
+  }
+  // console.log(nameDict)
+
   return (
     <Flex>
-      <Flex w="30%">
+      <Flex>
         <Flex direction="column" align="center" p="3vh 0 ">
           <Flex direction="column" w="100%" p="0 2vh" mb="2vh">
             <Text fontSize="md" color="font.primary" fontWeight="medium">
@@ -95,28 +110,44 @@ function Directory() {
             <Input placeholder="Search" size="sm" value={value} onChange={handleChange}></Input>
           </Flex>
           <Box w="100%" h="85vh" display="flex" flexDirection="column" overflowY="scroll">
-            {users.map((user) => (
-              <Flex
-                key={user.id}
-                align="center"
-                justifyContent="flex-start"
-                w="100%"
-                p="8px 2vh"
-                cursor="pointer"
-                _hover={{ background: COLORS.gray200 }}
-                onClick={() => setUser(user)}
-              >
-                <Avatar size="sm" name={user.username} mr="15px" />
-                <Flex direction="column">
-                  <Text fontSize="sm" fontWeight="medium">
-                    {user.username}
-                  </Text>
-                  <Text fontSize="xs" color="font.secondary">
-                    {user.email}
-                  </Text>
-                </Flex>
-              </Flex>
-            ))}
+            <Accordion allowToggle w="300px">
+              {Object.entries(nameDict).map(([key, value]) => {
+                return (
+                  <AccordionItem key={key}>
+                    <AccordionButton>
+                      <Box as="span" flex="1" textAlign="left" fontSize="xs" color="font.secondary">
+                        {key}
+                      </Box>
+                      <AccordionIcon />
+                    </AccordionButton>
+                    <AccordionPanel p="0">
+                      {value.map((user) => (
+                        <Flex
+                          key={user.id}
+                          align="center"
+                          justifyContent="flex-start"
+                          w="100%"
+                          p="8px 1vh"
+                          cursor="pointer"
+                          _hover={{ background: COLORS.gray200 }}
+                          onClick={() => setUser(user)}
+                        >
+                          <Avatar size="sm" name={user.username} mr="15px" />
+                          <Flex direction="column">
+                            <Text fontSize="sm" fontWeight="medium">
+                              {user.first_name + ' ' + user.last_name}
+                            </Text>
+                            <Text fontSize="xs" color="font.secondary">
+                              {user.email}
+                            </Text>
+                          </Flex>
+                        </Flex>
+                      ))}
+                    </AccordionPanel>
+                  </AccordionItem>
+                )
+              })}
+            </Accordion>
           </Box>
         </Flex>
       </Flex>
