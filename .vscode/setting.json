@@ -4,6 +4,7 @@
     "dist": true,
     "yarn.lock": true
   },
+  "eslint.workingDirectories": [{ "directory": "../", "changeProcessCWD": true }],
   "editor.formatOnSave": true,
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"

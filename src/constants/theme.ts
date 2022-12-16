@@ -6,6 +6,28 @@ export const theme = extendTheme({
     heading: 'Georgia, serif',
     mono: 'Menlo, monospace',
   },
+  textStyles: {
+    title: {
+      fontSize: '18px',
+      fontWeight: 500,
+      color: '#333333',
+    },
+    subtitle: {
+      fontSize: '16px',
+      fontWeight: 500,
+      color: '#333333',
+    },
+    body: {
+      fontSize: '14px',
+      fontWeight: 500,
+      color: '#666660',
+    },
+    description: {
+      fontSize: '14px',
+      fontWeight: 400,
+      color: '#666660',
+    },
+  },
   fontSizes: {
     xxs: '12px',
     xs: '14px',

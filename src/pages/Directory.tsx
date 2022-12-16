@@ -26,42 +26,7 @@ import styled from 'styled-components'
 import { COLORS } from '../constants/constants'
 import MOCK_USER from '../constants/randonUser.json'
 import { UserAssets } from '../constants/assets'
-
-interface User {
-  id: number
-  email: string
-  gender: string
-  phone_number: string
-  birthday: number
-  username: string
-  password: string
-  first_name: string
-  last_name: string
-  title: string
-  picture: string
-  location: {
-    street: string
-    city: string
-    state: string
-    postcode: number
-  }
-}
-
-const UserCard = ({ currUser }: { currUser: User }) => {
-  return (
-    <Flex align="center" justifyContent="flex-start" w="100%" p="8px 2vh">
-      <Avatar size="sm" name={currUser.username} mr="15px" />
-      <Flex direction="column">
-        <Text fontSize="sm" fontWeight="medium">
-          {currUser.username}
-        </Text>
-        <Text fontSize="xs" color="font.secondary">
-          {currUser.email}
-        </Text>
-      </Flex>
-    </Flex>
-  )
-}
+import UserCard from '../components/UserCard'
 
 function Directory() {
   const [value, setValue] = React.useState('')
@@ -73,38 +38,36 @@ function Directory() {
       ...user,
     }
   })
-  const [users, setUsers] = useState<User[]>(userArr)
+  const [users, setUsers] = useState<App.User[]>(userArr)
 
-  const [currUser, setCurrUser] = useState<User>(users[0])
-  const setUser = (user: User) => {
+  const [currUser, setCurrUser] = useState<App.User>(users[0])
+  const setUser = (user: App.User) => {
     setCurrUser(user)
   }
 
   // construct a dictionary where keys are letters from A to Z, values are empty array
-  const nameDict: Record<string, User[]> = {}
+  const nameDict: Record<string, App.User[]> = {}
   const startIndex = 'A'.charCodeAt(0)
   for (let i = 0; i < 26; i++) {
     const key = String.fromCharCode(i + startIndex)
     nameDict[key] = []
   }
-  // iterate through the userArr, sort and push user according to the first letter of their last them
+  // iterate through the userArr, sort and push user to the nameDict according to the first letter of their last_name
+  // jump over if the first letter of user's last_name is a letter from A to Z
   for (let i = 0; i < userArr.length; i++) {
     const user = userArr[i]
     const firstLetter = user.last_name[0].toUpperCase()
     if (!(firstLetter in nameDict)) continue
     nameDict[firstLetter].push(user)
   }
-  // console.log(nameDict)
 
   return (
     <Flex>
       <Flex>
         <Flex direction="column" align="center" p="3vh 0 ">
           <Flex direction="column" w="100%" p="0 2vh" mb="2vh">
-            <Text fontSize="md" color="font.primary" fontWeight="medium">
-              Directory
-            </Text>
-            <Text fontSize="xs" color="font.secondary" mb="10px">
+            <Text textStyle="title">Directory</Text>
+            <Text textStyle="body" mb="10px">
               Search directory of {users.length} employees
             </Text>
             <Input placeholder="Search" size="sm" value={value} onChange={handleChange}></Input>
@@ -130,16 +93,13 @@ function Directory() {
                           p="8px 1vh"
                           cursor="pointer"
                           _hover={{ background: COLORS.gray200 }}
+                          background={user.id === currUser.id ? COLORS.gray200 : 'transparent'}
                           onClick={() => setUser(user)}
                         >
                           <Avatar size="sm" name={user.username} mr="15px" />
                           <Flex direction="column">
-                            <Text fontSize="sm" fontWeight="medium">
-                              {user.first_name + ' ' + user.last_name}
-                            </Text>
-                            <Text fontSize="xs" color="font.secondary">
-                              {user.email}
-                            </Text>
+                            <Text textStyle="subtitle">{user.first_name + ' ' + user.last_name}</Text>
+                            <Text textStyle="body">{user.email}</Text>
                           </Flex>
                         </Flex>
                       ))}
@@ -180,69 +140,55 @@ function Directory() {
               <TabPanel>
                 <Grid templateColumns="repeat(2, 1fr)" gap={5}>
                   <GridItem w="100%" h="10">
-                    <Text fontSize="sm" color="font.primary" fontWeight="medium">
-                      Phone
-                    </Text>
-                    <Text fontSize="xs" color="font.secondary" mb="10px">
+                    <Text fontStyle="subtitle">Phone</Text>
+                    <Text textStyle="description" mb="10px">
                       {currUser.phone_number}
                     </Text>
                   </GridItem>
                   <GridItem w="100%" h="10">
-                    <Text fontSize="sm" color="font.primary" fontWeight="medium">
-                      Email
-                    </Text>
-                    <Text fontSize="xs" color="font.secondary" mb="10px">
+                    <Text fontStyle="subtitle">Email</Text>
+                    <Text textStyle="description" mb="10px">
                       {currUser.email}
                     </Text>
                   </GridItem>
                   <GridItem w="100%" h="10">
-                    <Text fontSize="sm" color="font.primary" fontWeight="medium">
-                      Title
-                    </Text>
-                    <Text fontSize="xs" color="font.secondary" mb="10px">
+                    <Text fontStyle="subtitle">Title</Text>
+                    <Text textStyle="description" mb="10px">
                       {currUser.title}
                     </Text>
                   </GridItem>
                   <GridItem w="100%" h="10">
-                    <Text fontSize="sm" color="font.primary" fontWeight="medium">
-                      Team
-                    </Text>
-                    <Text fontSize="xs" color="font.secondary" mb="10px">
+                    <Text fontStyle="subtitle">Team</Text>
+                    <Text textStyle="description" mb="10px">
                       {currUser.last_name}
                     </Text>
                   </GridItem>
                   <GridItem w="100%" h="10">
-                    <Text fontSize="sm" color="font.primary" fontWeight="medium">
-                      Location
-                    </Text>
-                    <Text fontSize="xs" color="font.secondary" mb="10px">
+                    <Text fontStyle="subtitle">Location</Text>
+                    <Text textStyle="description" mb="10px">
                       {currUser.location.city}
                     </Text>
                   </GridItem>
                   <GridItem w="100%" h="10">
-                    <Text fontSize="sm" color="font.primary" fontWeight="medium">
-                      Birthday
-                    </Text>
-                    <Text fontSize="xs" color="font.secondary" mb="10px">
+                    <Text fontStyle="subtitle">Birthday</Text>
+                    <Text textStyle="description" mb="10px">
                       {currUser.birthday}
                     </Text>
                   </GridItem>
                 </Grid>
                 <Flex direction="column" mt={5}>
-                  <Text fontSize="sm" color="font.primary" fontWeight="medium">
-                    About
-                  </Text>
-                  <Text fontSize="xs" color="font.secondary" mb="10px">
+                  <Text fontStyle="subtitle">About</Text>
+                  <Text textStyle="description" mb="10px">
                     Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium,
                     molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?
                   </Text>
-                  <Text fontSize="xs" color="font.secondary" mb="10px">
+                  <Text textStyle="description" mb="10px">
                     Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium,
                     totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae modi
                     molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?
                   </Text>
                 </Flex>
-                <Text fontSize="sm" color="font.primary" fontWeight="medium" mt={2}>
+                <Text fontStyle="subtitle" mt={2}>
                   Team
                 </Text>
                 <Grid templateColumns="repeat(2, 1fr)" gap={5}>
